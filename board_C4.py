@@ -25,14 +25,15 @@ class Board():
         
         # Set of cells that have been checked for each player
         # Used for visualising the board
-        self.state = np.random.randint(self.width, size=(self.width, self.height)) #np.zeros((self.width, self.height))
+        self.state = np.zeros((self.width, self.height))
         self.max_player_cells = []
         self.min_player_cells = []
         self.k = k
         self.num_moves = 0
 
-    def add_move_to_board(self, player, cell):
+    def add_move_to_board(self, cell):
         x,y = cell
+        player = (self.num_moves % 2) + 1
         self.state[y][x] = player
         
         if player == 1:
@@ -42,15 +43,20 @@ class Board():
         
         self.num_moves += 1
 
-    def get_children(self):
+    @property
+    def _children(self):
         children = []
+        for col in range(1,self.width+1):
+            if 0 in self.state[:,col-1]:
+                child_node = deepcopy(self)
+                move = child_node.get_cell(col)
+                print(move)
+                child_node.add_move_to_board(move)
+                children.append((child_node, move))
 
-        for col in range(self.width):
-            if 0 not in self.state[:,col]:
-                child_node = Board(self)
-                #child_node.add_move_to_board(player, col)
+        return children
 
-    def board_is_full(self):
+    def is_full(self):
         """Returns true if the board is full (case terminal node where the game 
         ends with a draw)."""
         return self.num_moves == int(self.width*self.height)
@@ -112,7 +118,7 @@ class Board():
             cell = (column_nr-1, y_coord)
             return cell
         else: 
-            return(column_nr-1, 0)
+            return (column_nr-1, 0)
   
     def print(self):
         """ Visualise the board on the terminal.
@@ -133,11 +139,11 @@ class Board():
 
         for cells in self.max_player_cells:
             x_1, y_1 = cells
-            array_board[self.height - (y_1+1)][x_1+1] = 'X'
+            array_board[self.height - (y_1+1)][x_1] = 'X'
 
         for cells in self.min_player_cells:
             x_2, y_2 = cells
-            array_board[self.height - (y_2+1)][x_2+1] = '0'
+            array_board[self.height - (y_2+1)][x_2] = '0'
 
         return array_board
     
@@ -168,5 +174,5 @@ if __name__ == '__main__':
     
     # Automatic board
     board = Board()
-    print(board.state)
+    print(board._children)
 

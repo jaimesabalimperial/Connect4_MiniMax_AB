@@ -97,18 +97,29 @@ class MinMaxPlayer(Player):
 
                 #check diagonal streaks
                 diags = self._get_diagonals(board,row,col)
-                for diag in diags:
-                    streak = self.streak_check(diag)
+                for board_diag in diags:
+                    streak = self.streak_check(board_diag, get_streak=True)
                     if not self.is_min:    
                         value += 10**(streak-1)
                     else:
                         value -= 10**(streak-1)
 
         return value
+
+    def should_replace_move(self, value):
+        """Function to determine if move shold be replaced by current node being evaluated."""
+        if self.is_min:
+            return value < self.best_value
+        else:
+            return value > self.best_value
     
-    def max(self):
-        pass
-    def min(self):
+    def max(self, board):
+        # 1 --> Max()
+        # 2 --> Min()
+        if board.winner_check == 1:
+            pass
+
+    def min(self, board):
         pass
         
     

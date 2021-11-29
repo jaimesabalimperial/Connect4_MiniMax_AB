@@ -36,22 +36,20 @@ class Game():
         curr_player, waiter = self.max_player, self.min_player
             
         # Simulates the game, until a player has lost
-        while self.board.winner_check() < 1 :
+        finished = False
+        while not finished:
             self.drawboard()
             print(f"{curr_player}, your turn:")
 
             target_col = curr_player.select_target(self.board)
             target_cell = self.board.get_cell(target_col)
-            if curr_player is self.max_player:
-                self.board.add_move_to_board(1,target_cell)
-            else:
-                self.board.add_move_to_board(2,target_cell)
 
-                # Game over if either player has lost
-            
+            self.board.add_move_to_board(target_cell)
+
+            # Game over if either player has lost
             winner = self.board.winner_check()
             if winner > 0:
-                break
+                finished = True
             # Players swap roles
             curr_player, waiter = waiter, curr_player  
 
@@ -63,7 +61,7 @@ class Game():
         self.board.print()
         
     def select_starting_player(self):
-        """ Selects a player to start at random. """
+        """ Selects a player to start at random (Max is always starting player)"""
         # Chooses the player to start first
         if random.choice([True, False]):
             max_player = self.player1
