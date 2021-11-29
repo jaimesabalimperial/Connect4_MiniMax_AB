@@ -2,9 +2,10 @@ import random
 
 #from player import Player
 from convert import CellConverter
+from player_C4y import ManualPlayer
 from board_C4 import Board
 
-class Game:
+class Game():
     """ Game class for performing game simulations.
     
     General rules of the game are defined in this class. For example:
@@ -12,7 +13,7 @@ class Game:
     - if all the opponent's ships have been sunk, the game stops, and the results are printed
     """
 
-    def __init__(self, player1, player2, size = (7,7), k = 4 ):
+    def __init__(self, player1, player2, size=(7,7), k=4):
         """ Initialises a game.
         
         Args:
@@ -21,6 +22,8 @@ class Game:
         """
         self.player1 = player1
         self.player2 = player2
+
+        self.max_player, self.min_player = self.select_starting_player()
         
         self.board = Board(size, k)
     
@@ -29,49 +32,55 @@ class Game:
         
         Prints out the necessary information (boards without ships, positions under attack...)
         """
-        board = self.board
-        player_current, waiter = self.select_starting_player()
-        print(f"{player_current} starts the game.")
+        print(f"{self.max_player} starts the game.")
+        curr_player, waiter = self.max_player, self.min_player
             
         # Simulates the game, until a player has lost
-        while board.winner_check() < 1 :
-            board.print()
-            print(f"{player_current}, your turn:")
+        while self.board.winner_check() < 1 :
+            self.drawboard()
+            print(f"{curr_player}, your turn:")
 
-            target_col = player_current.select_target(board)
-            target_cell = board.get_cell(target_col)
-            if player_current is self.player1:
-                board.add_move_to_board(1,target_cell)
+            target_col = curr_player.select_target(self.board)
+            target_cell = self.board.get_cell(target_col)
+            if curr_player is self.max_player:
+                self.board.add_move_to_board(1,target_cell)
             else:
-                board.add_move_to_board(2,target_cell)
+                self.board.add_move_to_board(2,target_cell)
 
                 # Game over if either player has lost
             
-            winner = board.winner_check()
+            winner = self.board.winner_check()
             if winner > 0:
                 break
             # Players swap roles
-            player_current, waiter = waiter, player_current  
+            curr_player, waiter = waiter, curr_player  
 
         # Show final results
-        board.print()
-        print(f"{player_current} has won!")
+        self.drawboard()
+        print(f"{curr_player} has won!")
+
+    def drawboard(self):
+        self.board.print()
         
     def select_starting_player(self):
         """ Selects a player to start at random. """
         # Chooses the player to start first
         if random.choice([True, False]):
-            attacker = self.player1
-            opponent = self.player2
+            max_player = self.player1
+            min_player = self.player2
         else:
-            attacker = self.player2
-            opponent = self.player1
+            max_player = self.player2
+            min_player = self.player1
+        
+        min_player.is_min = True
             
-        return attacker, opponent
+        return max_player, min_player
 
 if __name__ == '__main__':
     # SANDBOX for you to play and test your methods
-    test = Game("Toomas", "Peeter")
+    player1 = ManualPlayer(name="Jaime")
+    player2 = ManualPlayer(name="Mart")
+    test = Game(player1, player2)
     test.play()
     
     # Automatic board

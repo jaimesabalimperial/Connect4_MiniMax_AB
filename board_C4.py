@@ -1,11 +1,9 @@
 import sys
-sys.path.append("C:\\Users\\martb\\Desktop\\MSC AI\\Symb AI\\cw2\\python_cw3_mb1221\\battleship")
+from copy import deepcopy
+#sys.path.append("C:\\Users\\jsaimesabal\\Desktop\\ICL\\Intro to Symbolic AI\\CW2\\python_cw3_mb1221\\battleship")
 import numpy as np
 
-
-
-
-class Board:
+class Board():
     """ Class representing the board of the player. 
             
     Acts as an interface between the player and its ships.
@@ -14,12 +12,10 @@ class Board:
         """ Initialises a Board given a list of ships. 
         
         Args:
-            ships (list[Ship]): List of ships for the board. Auto-generates 
-                ships if not given.
             size (tuple[int, int]): (width, height) of the board (in terms of 
                 number of cells). Defaults to (10, 10).
-            ships_per_length (dict): A dict with the length of ship as keys and
-                the count as values. Defaults to 1 ship each for lengths 1-5.
+            k (int): The number of connected positions (horizontally, diagonally, or vertically)
+                needed to win a game.
                 
         Raises:
             ValueError if the number of ships is False
@@ -29,19 +25,35 @@ class Board:
         
         # Set of cells that have been checked for each player
         # Used for visualising the board
-        self.board_k = np.zeros((self.width, self.height))
-        self.player1_cells = []
-        self.player2_cells = []
+        self.state = np.random.randint(self.width, size=(self.width, self.height)) #np.zeros((self.width, self.height))
+        self.max_player_cells = []
+        self.min_player_cells = []
         self.k = k
-        
+        self.num_moves = 0
+
     def add_move_to_board(self, player, cell):
         x,y = cell
-        self.board_k[y][x] = player
+        self.state[y][x] = player
         
         if player == 1:
-            self.player1_cells.append(cell)
+            self.max_player_cells.append(cell)
         else:
-            self.player2_cells.append(cell)
+            self.min_player_cells.append(cell)
+        
+        self.num_moves += 1
+
+    def get_children(self):
+        children = []
+
+        for col in range(self.width):
+            if 0 not in self.state[:,col]:
+                child_node = Board(self)
+                #child_node.add_move_to_board(player, col)
+
+    def board_is_full(self):
+        """Returns true if the board is full (case terminal node where the game 
+        ends with a draw)."""
+        return self.num_moves == int(self.width*self.height)
         
     def winner_check(self):
         """ Check whether someone has won the game.
@@ -51,7 +63,7 @@ class Board:
                return False otherwise.
         """
         #Column check
-        board = self.board_k
+        board = self.state
         for col in range(self.width):
             board_col = board[:,col]
             winner = self.streak_check(board_col)
@@ -74,8 +86,7 @@ class Board:
         return 0
 
 
-
-    def streak_check(self, input):
+    def streak_check(self, input, get_streak=False):
         player = 0
         streak = 0
         for cell in input:
@@ -85,14 +96,20 @@ class Board:
                 player = cell
                 streak = 1
             if streak == self.k and player > 0:
-                return player
-        return 0
+                if get_streak:
+                    return streak
+                else:
+                    return player
+        if get_streak:
+            return get_streak
+        else:
+            return 0
 
     def get_cell(self, column_nr):
-        column = self.board_k[:,column_nr-1]
+        column = self.state[:,column_nr-1]
         if 1 in column or 2 in column:
             y_coord = np.where(column)[0].max() + 1
-            cell = (column_nr-1, y_coord )
+            cell = (column_nr-1, y_coord)
             return cell
         else: 
             return(column_nr-1, 0)
@@ -114,13 +131,13 @@ class Board:
         """ Generate an array representation of the Board for visualisation."""
         array_board = [[' ' for _ in range(self.width)] for _ in range(self.height)]
 
-        for cells in self.player1_cells:
+        for cells in self.max_player_cells:
             x_1, y_1 = cells
-            array_board[self.height - (y_1+1)][x_1] = 'X'
+            array_board[self.height - (y_1+1)][x_1+1] = 'X'
 
-        for cells in self.player2_cells:
+        for cells in self.min_player_cells:
             x_2, y_2 = cells
-            array_board[self.height - (y_2+1)][x_2] = '0'
+            array_board[self.height - (y_2+1)][x_2+1] = '0'
 
         return array_board
     
@@ -150,7 +167,6 @@ if __name__ == '__main__':
 
     
     # Automatic board
+    board = Board()
+    print(board.state)
 
-
-    
-    
