@@ -2,7 +2,7 @@ import random
 
 #from player import Player
 from convert import CellConverter
-from player_C4y import ManualPlayer
+from player_C4y import ManualPlayer, MinMaxPlayer
 from board_C4 import Board
 
 class Game():
@@ -44,7 +44,7 @@ class Game():
             target_col = curr_player.select_target(self.board)
             target_cell = self.board.get_cell(target_col)
 
-            self.board.add_move_to_board(target_cell)
+            self.board.make_move(target_cell)
 
             # Game over if either player has lost
             winner = self.board.winner_check()
@@ -71,12 +71,14 @@ class Game():
             min_player = self.player1
         
         min_player.is_min = True
+        #min_player.name = "Min"
+        #max_player.name = "Max"
             
         return max_player, min_player
 
 if __name__ == '__main__':
     # SANDBOX for you to play and test your methods
-    player1 = ManualPlayer(name="Jaime")
+    player1 = MinMaxPlayer(name="Jaime")
     player2 = ManualPlayer(name="Mart")
     test = Game(player1, player2)
     test.play()

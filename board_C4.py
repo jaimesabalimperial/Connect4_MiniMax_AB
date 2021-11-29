@@ -31,7 +31,7 @@ class Board():
         self.k = k
         self.num_moves = 0
 
-    def add_move_to_board(self, cell):
+    def make_move(self, cell):
         x,y = cell
         player = (self.num_moves % 2) + 1
         self.state[y][x] = player
@@ -50,8 +50,7 @@ class Board():
             if 0 in self.state[:,col-1]:
                 child_node = deepcopy(self)
                 move = child_node.get_cell(col)
-                print(move)
-                child_node.add_move_to_board(move)
+                child_node. make_move(move)
                 children.append((child_node, move))
 
         return children
@@ -174,5 +173,8 @@ if __name__ == '__main__':
     
     # Automatic board
     board = Board()
+    col = 1  
+    move = board.get_cell(col)
+    board.make_move(move)
     print(board._children)
 

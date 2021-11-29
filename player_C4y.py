@@ -48,7 +48,7 @@ class MinMaxPlayer(Player):
         """Retrieves positive and negative diagonals from a cell in a grid.
         
         Args:
-            board {Board()}:
+            board {Board()}: current board state.
             row {int}: row of cell to evaluate
             col {int}: column of cell to evaluate
         
@@ -113,16 +113,65 @@ class MinMaxPlayer(Player):
         else:
             return value > self.best_value
     
-    def max(self, board):
-        # 1 --> Max()
-        # 2 --> Min()
-        if board.winner_check == 1:
-            pass
+    def max(self, depth, board):
+        if board.is_full:
+            print("Board is full")
+            return -float("inf"), -1
+        elif depth == 0:
+            print("Depth is 0")
+            return self.heuristic(board), -1
 
-    def min(self, board):
-        pass
-        
-    
+        #initialise best value to be infinite and negative such that any action will be chosen at first
+        self.best_value = -float("inf")
+
+        best_move = -1
+
+        #iterate over all possible actions and retrieve best score and thus move
+        children = board._children
+        for child in children:
+            childboard, move = child
+            print(childboard)
+            temp = self.min(childboard, depth-1)[0]
+            if self.should_replace_move(temp):
+                self.best_value = temp
+                best_move = move
+
+        return self.best_value, best_move
+
+    def min(self, depth, board):
+        if board.is_full:
+            print("Board is full")
+            return float("inf"), -1
+        elif depth == 0:
+            print("Depth is 0")
+            return self.heuristic(board), -1
+
+        #initialise best value to be infinite and positive such that any action will be chosen at first
+        self.best_value = float("inf")
+
+        best_move = -1
+
+        #iterate over all possible actions and retrieve best score and thus move
+        children = board._children
+        for child in children:
+            childboard, move = child
+            print(childboard)
+            temp = self.max(childboard, depth-1)[0]
+            if self.should_replace_move(temp):
+                self.best_value = temp
+                best_move = move
+                print(self.best_value, best_move)
+
+        return self.best_value, best_move
+
+    def select_target(self, board):
+        if not self.is_min:
+            best_value, best_move = self.max(self.max_depth, board)
+        else:
+            best_value, best_move = self.min(self.max_depth, board)
+
+        return best_move
+
 class ManualPlayer(Player):
     """ A player playing manually via the terminal
     """
@@ -179,3 +228,5 @@ class RandomPlayer(Player):
 
 if __name__ == '__main__':
     player = MinMaxPlayer()
+    board = Board()
+    print(player.select_target(board))
