@@ -8,7 +8,7 @@ class Board():
             
     Acts as an interface between the player and its ships.
     """
-    def __init__(self, size=(7,7), k=4):
+    def __init__(self, size, k):
         """ Initialises a Board given a list of ships. 
         
         Args:
@@ -25,7 +25,7 @@ class Board():
         
         # Set of cells that have been checked for each player
         # Used for visualising the board
-        self.state = np.zeros((self.width, self.height))
+        self.state = np.zeros((self.height, self.width))
         self.max_player_cells = []
         self.min_player_cells = []
         self.k = k
@@ -48,11 +48,13 @@ class Board():
         else:
             self.min_player_cells.append(cell)
 
+    def is_valid(self, move):
+        return 0 in self.state[:,move-1]
 
     def get_children(self):
         children = []
         for col in range(1,self.width+1):
-            if 0 in self.state[:,col-1]:
+            if self.is_valid(col):
                 child_node = deepcopy(self)
                 move_cell = child_node.get_cell(col)
                 child_node.make_move(move_cell, recursion=True)
@@ -81,16 +83,16 @@ class Board():
                 return winner
         #Row check
         for row in range(self.height):
-            board_row = board[row,:]
+            board_row = board[row]
             winner = self.streak_check(board_row)
             if winner > 0:
                 return winner
 
-        diags = [board[::-1,:].diagonal(i) for i in range(-3,4)]
-        diags.extend(board.diagonal(i) for i in range(3,-4,-1))
+        diags = [board[::-1,:].diagonal(i) for i in range(-self.width+1,self.height)]
+        diags.extend(board.diagonal(i) for i in range(self.height-1,-self.width,-1))
         all_diags = [n.tolist() for n in diags if len(n) >= self.k]
-        for diag in all_diags:
-            winner = self.streak_check(diag)
+        for diag in all_diags: 
+            winner = self.streak_check(diag) 
             if winner > 0:
                 return winner
         return 0

@@ -25,24 +25,6 @@ class Player():
 
     def __str__(self):
         return self.name
-    
-    def select_target(self):
-        """ Select target coordinates to attack.
-        
-        Abstract method that should be implemented by any subclasses of Player.
-        
-        Returns:
-            tuple[int, int] : (x, y) cell coordinates at which to launch the 
-                next attack
-        """
-        raise NotImplementedError
-
-class MinMaxPlayer(Player):
-    def __init__(self, max_depth=5, name=None):
-        super().__init__(name)
-
-        self.max_depth = max_depth
-        self.is_min = None
 
     def _get_diagonals(self,board,row,col):
         """Retrieves positive and negative diagonals from a cell in a grid.
@@ -98,8 +80,8 @@ class MinMaxPlayer(Player):
             board_col = state[:,col]
             value += self.get_value(board, board_col)
 
-        for col in range(board.width):
-            for row in range(board.height):
+        for col in range(board.height):
+            for row in range(board.width):
                 #check diagonal streaks
                 diags = self._get_diagonals(board,row,col)
                 for board_diag in diags:
@@ -107,13 +89,33 @@ class MinMaxPlayer(Player):
 
         return value
 
+    
+    def select_target(self):
+        """ Select target coordinates to attack.
+        
+        Abstract method that should be implemented by any subclasses of Player.
+        
+        Returns:
+            tuple[int, int] : (x, y) cell coordinates at which to launch the 
+                next attack
+        """
+        raise NotImplementedError
+
+class MiniMaxPlayer(Player):
+    def __init__(self, max_depth=5, name=None):
+        super().__init__(name)
+
+        self.max_depth = max_depth
+        self.is_min = None
+
+
     def max(self, board, depth=0):
         if board.is_terminal():
             return -float("inf"), None
         elif depth == self.max_depth:
             return self.heuristic(board), None
-        elif board.game_moves == 0:
-            return self.heuristic(board), board.width // 2 + 1
+        #elif board.game_moves == 0:
+        #    return self.heuristic(board), board.width // 2 + 1
         
 
         #initialise best value to be infinite and negative such that any action will be chosen at first
@@ -144,8 +146,6 @@ class MinMaxPlayer(Player):
         best_value = float("inf")
         best_move = None
 
-
-
         #iterate over all possible actions and retrieve best score and thus move
         children = board.get_children()
         for child in children:
@@ -170,10 +170,99 @@ class MinMaxPlayer(Player):
         print(best_move)
         return best_move
 
+class AlphaBetaPlayer(Player):
+    def __init__(self, name=None, max_depth=5,  manual=False):
+        super().__init__(name)
+        ## Alpha is minimum value secured by Max, for herself
+
+        self.max_depth = max_depth
+        self.is_min = None
+        self.first = True
+        self.alpha = None
+        self.beta = None
+        self.manual = manual
+        self.states_visited = 0
+
+
+    def max(self, board, alpha, beta, depth=0):
+        if board.is_terminal():
+            return -float("inf"), None
+        elif depth == self.max_depth:
+            return self.heuristic(board), None
+        #elif board.game_moves == 0:
+        #    return self.heuristic(board), board.width // 2 + 1
+        
+
+        #initialise best value to be infinite and negative such that any action will be chosen at first
+        best_value = -float("inf")  
+        best_move = None
+
+        #iterate over all possible actions and retrieve best score and thus move
+        children = board.get_children()
+        for child in children:
+            self.states_visited += 1
+            child_state, move = child
+            child_val = self.min(child_state, alpha, beta, depth+1)[0]
+
+            if child_val > best_value:
+                best_value = child_val
+                best_move = move
+
+            alpha = max(alpha, best_value)
+
+            if alpha >= beta:
+                break
+
+        #print(best_value, best_move)
+
+        return best_value, best_move
+
+    def min(self, board, alpha, beta, depth=0):
+        if board.is_terminal():
+            return float("inf"), None
+        elif depth == self.max_depth:
+            return self.heuristic(board), None
+
+        #initialise best value to be infinite and positive such that any action will be chosen at first
+        best_value = float("inf")
+        best_move = None
+
+        #iterate over all possible actions and retrieve best score and thus move
+        children = board.get_children()
+        for child in children:
+            self.states_visited += 1
+            child_state, move = child
+            #child_state.print()
+            child_val = self.max(child_state, alpha, beta, depth+1)[0]
+
+            if child_val < best_value:
+                best_value = child_val
+                best_move = move
+
+            beta = min(beta, child_val)
+
+            if alpha >= beta:
+                break
+        
+        #print(best_value, best_move)
+
+        return best_value, best_move
+
+    def select_target(self, board):
+        self.states_visited = 0
+
+        if not self.is_min:
+            best_move = self.max(board, alpha = -float("inf"), beta = float("inf"))[1]
+        else:
+            best_move = self.min(board, alpha = -float("inf"), beta = float("inf"))[1]
+
+        print(best_move)
+        return best_move
+
 class ManualPlayer(Player):
     """ A player playing manually via the terminal
     """
-    def __init__(self, name=None):
+    def __init__(self, name=None, max_depth = 5, AB=True, MiniMax = False):
         """ Initialise the player with a board and other attributes.
         
         Args:
@@ -182,6 +271,12 @@ class ManualPlayer(Player):
             name (str): Player's name
         """
         super().__init__(name)
+        self.max_depth = max_depth
+        
+        if AB:
+            self.player= AlphaBetaPlayer(name=self.name, max_depth=self.max_depth)
+        elif MiniMax:
+            self.player= MiniMaxPlayer(name=self.name, max_depth=self.max_depth)
 
     def select_target(self, board):
         """ Read coordinates from user prompt.
@@ -192,6 +287,8 @@ class ManualPlayer(Player):
         """
         while True:
             try:
+                best_move = self.player.select_target(board)
+                print("Best action determined by AI: ", best_move)
                 target_col = int(input("Enter the target column value: "))
                 return target_col
             except ValueError as error:
@@ -225,7 +322,7 @@ class RandomPlayer(Player):
         return column
 
 if __name__ == '__main__':
-    player = MinMaxPlayer()
+    player = MiniMaxPlayer()
     board = Board()
     board.make_move(board.get_cell(1))
     board.make_move(board.get_cell(2))
