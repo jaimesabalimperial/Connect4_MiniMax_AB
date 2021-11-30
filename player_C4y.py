@@ -114,9 +114,9 @@ class MinMaxPlayer(Player):
         else:
             return value > best_value
     
-    def max(self, board, player, depth=0):
-        if board.is_full():
-            return -float("inf") if not self.is_min else float("inf"), -1
+    def max(self, board, depth=0):
+        if board.is_terminal():
+            return -float("inf"), None
         elif depth == self.max_depth:
             return self.heuristic(board), None
         elif board.game_moves == 0:
@@ -124,18 +124,14 @@ class MinMaxPlayer(Player):
         
 
         #initialise best value to be infinite and negative such that any action will be chosen at first
-        if player:
-            best_value = -float("inf")  
-        else:
-            best_value = float("inf")  
-        
+        best_value = -float("inf")  
         best_move = None
 
         #iterate over all possible actions and retrieve best score and thus move
         children = board.get_children()
         for child in children:
             child_state, move_cell = child
-            child_val = self.min(child_state, not player, depth+1)[0]
+            child_val = self.min(child_state, depth+1)[0]
 
             if self.should_replace_move(child_val, best_value):
                 best_value = child_val
@@ -145,25 +141,21 @@ class MinMaxPlayer(Player):
 
         return best_value, best_move
 
-    def min(self, board, player, depth=0):
-        if board.is_full():
-            return float("inf") if self.is_min else -float("inf"), -1
+    def min(self, board, depth=0):
+        if board.is_terminal():
+            return float("inf"), None
         elif depth == self.max_depth:
             return self.heuristic(board), None
 
         #initialise best value to be infinite and positive such that any action will be chosen at first
-        if player:
-            best_value = float("inf")
-        else:
-            best_value = -float("inf")  
-
+        best_value = float("inf")
         best_move = None
 
         #iterate over all possible actions and retrieve best score and thus move
         children = board.get_children()
         for child in children:
             child_state, move_cell = child
-            child_val = self.max(child_state, not player, depth+1)[0]
+            child_val = self.max(child_state, depth+1)[0]
 
             if self.should_replace_move(child_val, best_value):
                 best_value = child_val
@@ -175,9 +167,9 @@ class MinMaxPlayer(Player):
 
     def select_target(self, board):
         if not self.is_min:
-            best_value, best_move = self.max(board, self.is_min)
+            best_move = self.max(board)[1]
         else:
-            best_value, best_move = self.min(board, self.is_min)
+            best_move = self.min(board)[1]
 
         print(best_move)
         return best_move
