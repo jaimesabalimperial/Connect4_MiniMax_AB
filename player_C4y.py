@@ -107,13 +107,6 @@ class MinMaxPlayer(Player):
 
         return value
 
-    def should_replace_move(self, value, best_value, min_player):
-        """Function to determine if move shold be replaced by current node being evaluated."""
-        if min_player:
-            return value < best_value
-        else:
-            return value > best_value
-    
     def max(self, board, depth=0):
         if board.is_terminal():
             return -float("inf"), None
@@ -130,12 +123,12 @@ class MinMaxPlayer(Player):
         #iterate over all possible actions and retrieve best score and thus move
         children = board.get_children()
         for child in children:
-            child_state, move_cell = child
+            child_state, move = child
             child_val = self.min(child_state, depth+1)[0]
 
-            if self.should_replace_move(child_val, best_value, min_player=False):
+            if child_val > best_value:
                 best_value = child_val
-                best_move = move_cell[0]
+                best_move = move
 
         print(best_value, best_move)
 
@@ -156,13 +149,13 @@ class MinMaxPlayer(Player):
         #iterate over all possible actions and retrieve best score and thus move
         children = board.get_children()
         for child in children:
-            child_state, move_cell = child
+            child_state, move = child
             child_state.print()
             child_val = self.max(child_state, depth+1)[0]
 
-            if self.should_replace_move(child_val, best_value, min_player=True):
+            if child_val < best_value:
                 best_value = child_val
-                best_move = move_cell[0]
+                best_move = move
         
         print(best_value, best_move)
 

@@ -56,7 +56,7 @@ class Board():
                 child_node = deepcopy(self)
                 move_cell = child_node.get_cell(col)
                 child_node.make_move(move_cell, recursion=True)
-                children.append((child_node, move_cell))
+                children.append((child_node, col))
 
         return children
 
