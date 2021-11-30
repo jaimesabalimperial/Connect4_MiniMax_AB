@@ -29,36 +29,41 @@ class Board():
         self.max_player_cells = []
         self.min_player_cells = []
         self.k = k
-        self.num_moves = 0
+        self.recur_moves = 0
+        self.game_moves = 0
 
-    def make_move(self, cell):
+    def make_move(self, cell, recursion=False):
         x,y = cell
-        player = (self.num_moves % 2) + 1
+        if not recursion:
+            player = self.game_moves % 2 + 1
+            self.game_moves += 1
+        else:
+            player = self.recur_moves % 2 + 1
+            self.recur_moves +=1
+
         self.state[y][x] = player
         
         if player == 1:
             self.max_player_cells.append(cell)
         else:
             self.min_player_cells.append(cell)
-        
-        self.num_moves += 1
 
-    @property
-    def _children(self):
+
+    def get_children(self):
         children = []
         for col in range(1,self.width+1):
             if 0 in self.state[:,col-1]:
                 child_node = deepcopy(self)
-                move = child_node.get_cell(col)
-                child_node. make_move(move)
-                children.append((child_node, move))
+                move_cell = child_node.get_cell(col)
+                child_node.make_move(move_cell, recursion=True)
+                children.append((child_node, move_cell))
 
         return children
 
     def is_full(self):
         """Returns true if the board is full (case terminal node where the game 
         ends with a draw)."""
-        return self.num_moves == int(self.width*self.height)
+        return self.game_moves == int(self.width*self.height)
         
     def winner_check(self):
         """ Check whether someone has won the game.
@@ -90,8 +95,28 @@ class Board():
                 return winner
         return 0
 
+    def streak_check_heuristic(self, input):
+        player = 0
+        val_to_player = {1:"Max", 2:"Min"}
+        streaks_dict = {"Max":[], "Min":[]}
 
-    def streak_check(self, input, get_streak=False):
+        for cell in input:
+            if cell == 0:
+                continue
+
+            if val_to_player[cell] == player:
+                streaks_dict[player][-1] += 1
+            else: 
+                player = val_to_player[cell]
+                streaks_dict[player].append(1)
+
+            if streaks_dict[player][-1] == self.k:
+                return streaks_dict
+
+        return streaks_dict
+
+
+    def streak_check(self, input):
         player = 0
         streak = 0
         for cell in input:
@@ -101,14 +126,9 @@ class Board():
                 player = cell
                 streak = 1
             if streak == self.k and player > 0:
-                if get_streak:
-                    return streak
-                else:
-                    return player
-        if get_streak:
-            return get_streak
-        else:
-            return 0
+                return player
+        return 0
+
 
     def get_cell(self, column_nr):
         column = self.state[:,column_nr-1]

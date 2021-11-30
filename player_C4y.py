@@ -69,107 +69,117 @@ class MinMaxPlayer(Player):
         diags = [pos_diag, neg_diag]
 
         return diags
+
+    def get_value(self, board, line):
+        value = 0
+        streaks_dict = board.streak_check_heuristic(line)
+        for player, streaks in streaks_dict.items(): 
+            for streak in streaks:
+                if player == "Max":
+                    value += 10**(streak-1)
+                elif player == "Min":
+                    value -= 10**(streak-1)
+
+        return value
     
     def heuristic(self, board):
         """Calculates the heuristic value of a specific state for the current player (Min or Max)."""
         value = 0
         state = board.state
-
         #calculate heuristic by considering each players' current streaks
         # ---> heuristic is calculated as +-10^{streak-1}, where the + corresponds to Max() and - to Min()
-        for col in range(self.width):
-            for row in range(self.height):
-                #check horizontal streaks
-                board_row = state[row,:]
-                streak = board.streak_check(board_row, get_streak=True)
-                if not self.is_min:    
-                    value += 10**(streak-1)
-                else:
-                    value -= 10**(streak-1)
+        for row in range(board.height):
+            #check horizontal streaks
+            board_row = state[row,:]
+            value += self.get_value(board, board_row)
 
-                #check vertical streaks
-                board_col = state[:,col]
-                streak = board.streak_check(board_col, get_streak=True)
-                if not self.is_min:    
-                    value += 10**(streak-1)
-                else:
-                    value -= 10**(streak-1)
+        for col in range(board.width):
+            #check vertical streaks
+            board_col = state[:,col]
+            value += self.get_value(board, board_col)
 
+        for col in range(board.width):
+            for row in range(board.height):
                 #check diagonal streaks
                 diags = self._get_diagonals(board,row,col)
                 for board_diag in diags:
-                    streak = self.streak_check(board_diag, get_streak=True)
-                    if not self.is_min:    
-                        value += 10**(streak-1)
-                    else:
-                        value -= 10**(streak-1)
+                    value += self.get_value(board, board_diag)
 
         return value
 
-    def should_replace_move(self, value):
+    def should_replace_move(self, value, best_value):
         """Function to determine if move shold be replaced by current node being evaluated."""
         if self.is_min:
-            return value < self.best_value
+            return value < best_value
         else:
-            return value > self.best_value
+            return value > best_value
     
-    def max(self, depth, board):
-        if board.is_full:
-            print("Board is full")
-            return -float("inf"), -1
-        elif depth == 0:
-            print("Depth is 0")
-            return self.heuristic(board), -1
+    def max(self, board, player, depth=0):
+        if board.is_full():
+            return -float("inf") if not self.is_min else float("inf"), -1
+        elif depth == self.max_depth:
+            return self.heuristic(board), None
+        elif board.game_moves == 0:
+            return self.heuristic(board), board.width // 2 + 1
+        
 
         #initialise best value to be infinite and negative such that any action will be chosen at first
-        self.best_value = -float("inf")
-
-        best_move = -1
+        if player:
+            best_value = -float("inf")  
+        else:
+            best_value = float("inf")  
+        
+        best_move = None
 
         #iterate over all possible actions and retrieve best score and thus move
-        children = board._children
+        children = board.get_children()
         for child in children:
-            childboard, move = child
-            print(childboard)
-            temp = self.min(childboard, depth-1)[0]
-            if self.should_replace_move(temp):
-                self.best_value = temp
-                best_move = move
+            child_state, move_cell = child
+            child_val = self.min(child_state, not player, depth+1)[0]
 
-        return self.best_value, best_move
+            if self.should_replace_move(child_val, best_value):
+                best_value = child_val
+                best_move = move_cell[0]
 
-    def min(self, depth, board):
-        if board.is_full:
-            print("Board is full")
-            return float("inf"), -1
-        elif depth == 0:
-            print("Depth is 0")
-            return self.heuristic(board), -1
+        print(best_value, best_move)
+
+        return best_value, best_move
+
+    def min(self, board, player, depth=0):
+        if board.is_full():
+            return float("inf") if self.is_min else -float("inf"), -1
+        elif depth == self.max_depth:
+            return self.heuristic(board), None
 
         #initialise best value to be infinite and positive such that any action will be chosen at first
-        self.best_value = float("inf")
+        if player:
+            best_value = float("inf")
+        else:
+            best_value = -float("inf")  
 
-        best_move = -1
+        best_move = None
 
         #iterate over all possible actions and retrieve best score and thus move
-        children = board._children
+        children = board.get_children()
         for child in children:
-            childboard, move = child
-            print(childboard)
-            temp = self.max(childboard, depth-1)[0]
-            if self.should_replace_move(temp):
-                self.best_value = temp
-                best_move = move
-                print(self.best_value, best_move)
+            child_state, move_cell = child
+            child_val = self.max(child_state, not player, depth+1)[0]
 
-        return self.best_value, best_move
+            if self.should_replace_move(child_val, best_value):
+                best_value = child_val
+                best_move = move_cell[0]
+        
+        print(best_value, best_move)
+
+        return best_value, best_move
 
     def select_target(self, board):
         if not self.is_min:
-            best_value, best_move = self.max(self.max_depth, board)
+            best_value, best_move = self.max(board, self.is_min)
         else:
-            best_value, best_move = self.min(self.max_depth, board)
+            best_value, best_move = self.min(board, self.is_min)
 
+        print(best_move)
         return best_move
 
 class ManualPlayer(Player):
@@ -229,4 +239,12 @@ class RandomPlayer(Player):
 if __name__ == '__main__':
     player = MinMaxPlayer()
     board = Board()
-    print(player.select_target(board))
+    board.make_move(board.get_cell(1))
+    board.make_move(board.get_cell(2))
+    board.make_move(board.get_cell(1))
+    board.make_move(board.get_cell(2))
+    board.make_move(board.get_cell(1))
+    print(board.state[1])
+    print(board.streak_check_heuristic(board.state[1]))
+    #print(player.heuristic(board))
+    #print(player._get_diagonals(board, 1, 0))

@@ -34,6 +34,7 @@ class Game():
         """
         print(f"{self.max_player} starts the game.")
         curr_player, waiter = self.max_player, self.min_player
+
             
         # Simulates the game, until a player has lost
         finished = False
@@ -50,8 +51,9 @@ class Game():
             winner = self.board.winner_check()
             if winner > 0:
                 finished = True
-            # Players swap roles
-            curr_player, waiter = waiter, curr_player  
+            else:
+                # Players swap roles
+                curr_player, waiter = waiter, curr_player  
 
         # Show final results
         self.drawboard()
@@ -78,7 +80,8 @@ class Game():
 
 if __name__ == '__main__':
     # SANDBOX for you to play and test your methods
-    player1 = MinMaxPlayer(name="Jaime")
+    player1 = MinMaxPlayer(name="Jaime", max_depth=5)
+    #player1 = ManualPlayer(name="Jaime")
     player2 = ManualPlayer(name="Mart")
     test = Game(player1, player2)
     test.play()
