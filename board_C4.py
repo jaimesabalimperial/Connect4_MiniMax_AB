@@ -96,7 +96,7 @@ class Board():
         return 0
 
     def is_terminal(self):
-        return self.winner_check() > 0
+        return self.winner_check() > 0 or self.is_full()
 
     def streak_check_heuristic(self, input):
         player = 0

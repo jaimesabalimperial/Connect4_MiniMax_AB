@@ -107,9 +107,9 @@ class MinMaxPlayer(Player):
 
         return value
 
-    def should_replace_move(self, value, best_value):
+    def should_replace_move(self, value, best_value, min_player):
         """Function to determine if move shold be replaced by current node being evaluated."""
-        if self.is_min:
+        if min_player:
             return value < best_value
         else:
             return value > best_value
@@ -133,7 +133,7 @@ class MinMaxPlayer(Player):
             child_state, move_cell = child
             child_val = self.min(child_state, depth+1)[0]
 
-            if self.should_replace_move(child_val, best_value):
+            if self.should_replace_move(child_val, best_value, min_player=False):
                 best_value = child_val
                 best_move = move_cell[0]
 
@@ -151,13 +151,16 @@ class MinMaxPlayer(Player):
         best_value = float("inf")
         best_move = None
 
+
+
         #iterate over all possible actions and retrieve best score and thus move
         children = board.get_children()
         for child in children:
             child_state, move_cell = child
+            child_state.print()
             child_val = self.max(child_state, depth+1)[0]
 
-            if self.should_replace_move(child_val, best_value):
+            if self.should_replace_move(child_val, best_value, min_player=True):
                 best_value = child_val
                 best_move = move_cell[0]
         
@@ -236,7 +239,8 @@ if __name__ == '__main__':
     board.make_move(board.get_cell(1))
     board.make_move(board.get_cell(2))
     board.make_move(board.get_cell(1))
-    print(board.state[1])
-    print(board.streak_check_heuristic(board.state[1]))
+    board.make_move(board.get_cell(1))
+    print(board.state)
+    print(player.heuristic(board))
     #print(player.heuristic(board))
     #print(player._get_diagonals(board, 1, 0))
