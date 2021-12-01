@@ -115,8 +115,8 @@ if __name__ == '__main__':
 
     num_moves = 10 #number of moves to average results over (replications)
 
-    player1 = AlphaBetaPlayer(name="Jaime", max_depth=5)
-    #player1 = ManualPlayer(name="Jaime", max_depth=5)
+    #player1 = AlphaBetaPlayer(name="Jaime", max_depth=5)
+    player1 = ManualPlayer(name="Jaime", max_depth=5)
     player2 = AlphaBetaPlayer(name="Mart", max_depth=5)
     test = Game(player1,player2,size=(7,6), k=4)
     test.play(num_moves)

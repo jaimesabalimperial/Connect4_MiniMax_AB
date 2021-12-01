@@ -372,6 +372,7 @@ class ManualPlayer(Player):
         """
         super().__init__(name)
         self.max_depth = max_depth
+        self.states_visited = None
         
         if AB:
             self.player= AlphaBetaPlayer(name=self.name, max_depth=self.max_depth)
@@ -389,6 +390,7 @@ class ManualPlayer(Player):
         while True:
             try:
                 best_move = self.player.select_target(board)
+                self.states_visited = self.player.states_visited
                 print("Best action determined by AI: ", best_move)
                 target_col = int(input("Enter the target column value: "))
                 return target_col
