@@ -61,17 +61,17 @@ class Board():
         """Returns True if column (move) is a valid column to drop a piece in."""
         return 0 in self.state[:,move-1]
 
-    def get_children(self):
-        """Retrieves children that are valid successor states to current board state."""
-        children = []
+    def get_actions(self):
+        """Retrieves actions that are valid successor states to current board state."""
+        actions = []
         for col in range(1,self.width+1):
             if self.is_valid(col):
-                child_node = deepcopy(self)
-                move_cell = child_node.get_cell(col)
-                child_node.make_move(move_cell, recursion=True)
-                children.append((child_node, col))
+                action_node = deepcopy(self)
+                move_cell = action_node.get_cell(col)
+                action_node.make_move(move_cell, recursion=True)
+                actions.append((action_node, col))
 
-        return children
+        return actions
 
     def is_full(self):
         """Returns true if the board is full (case terminal node where the game 
@@ -240,5 +240,5 @@ if __name__ == '__main__':
     col = 1  
     move = board.get_cell(col)
     board.make_move(move)
-    print(board._children)
+    print(board.get_actions())
 

@@ -161,14 +161,14 @@ class MiniMaxPlayer(Player):
         best_move = None
 
         #iterate over all valid actions and retrieve best score and thus move
-        children = board.get_children()
-        for child in children:
+        actions = board.get_actions()
+        for action in actions:
             self.states_visited += 1
-            child_state, move = child
-            child_val = self.min(child_state, depth+1)[0]
+            next_state, move = action
+            val = self.min(next_state, depth+1)[0]
 
-            if child_val > best_value:
-                best_value = child_val
+            if val > best_value:
+                best_value = val
                 best_move = move
 
         #print(best_value, best_move)
@@ -197,15 +197,15 @@ class MiniMaxPlayer(Player):
         best_move = None
 
         #iterate over all possible actions and retrieve best score and thus move
-        children = board.get_children()
-        for child in children:
+        actions = board.get_actions()
+        for action in actions:
             self.states_visited += 1
-            child_state, move = child
-            child_state.print()
-            child_val = self.max(child_state, depth+1)[0]
+            next_state, move = action
+            #child_state.print()
+            val = self.max(next_state, depth+1)[0]
 
-            if child_val < best_value:
-                best_value = child_val
+            if val < best_value:
+                best_value = val
                 best_move = move
         
         #print(best_value, best_move)
@@ -270,14 +270,14 @@ class AlphaBetaPlayer(Player):
         best_move = None
 
         #iterate over all possible actions and retrieve best score and thus move
-        children = board.get_children()
-        for child in children:
+        actions = board.get_actions()
+        for action in actions:
             self.states_visited += 1
-            child_state, move = child
-            child_val = self.min(child_state, alpha, beta, depth+1)[0]
+            next_state, move = action
+            val = self.min(next_state, alpha, beta, depth+1)[0]
 
-            if child_val > best_value: #update best value if current evaluated value from move is lower than best
-                best_value = child_val
+            if val > best_value: #update best value if current evaluated value from move is lower than best
+                best_value = val
                 best_move = move
 
             alpha = max(alpha, best_value) #update beta if best value is lower than beta
@@ -315,15 +315,15 @@ class AlphaBetaPlayer(Player):
         best_move = None
 
         #iterate over all possible actions and retrieve best score (and thus corresponding move)
-        children = board.get_children()
-        for child in children:
+        actions = board.get_actions()
+        for action in actions:
             self.states_visited += 1
-            child_state, move = child
+            next_state, move = action
             #child_state.print()
-            child_val = self.max(child_state, alpha, beta, depth+1)[0]
+            val = self.max(next_state, alpha, beta, depth+1)[0]
 
-            if child_val < best_value:
-                best_value = child_val
+            if val < best_value:
+                best_value = val
                 best_move = move
 
             beta = min(beta, best_value) #update beta if best value is lower than beta
