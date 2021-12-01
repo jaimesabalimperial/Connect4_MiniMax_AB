@@ -68,9 +68,9 @@ class Player():
             for streak in streaks:
                  #exponentially higher value for larger assigned to larger streaks
                 if player == "Max":
-                    value += 20**(streak-1) #add for Max() player streaks.
+                    value += (80/board.k)**(streak) #add for Max() player streaks.
                 elif player == "Min":
-                    value -= 20**(streak-1) #subtract for Min() player streaks.
+                    value -= (80/board.k)**(streak) #subtract for Min() player streaks.
 
         return value
     
