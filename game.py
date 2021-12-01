@@ -49,7 +49,8 @@ class Game():
             
         # Simulates the game, until a player has lost
         finished = False
-        while not finished:
+        break_finished = False
+        while not finished and not break_finished:
             self.drawboard()
             print(f"{curr_player}, your turn:")
 
@@ -74,11 +75,11 @@ class Game():
             
             if num_moves is not None:
                 if self.board.game_moves >= num_moves:
-                    finished = True
+                    break_finished = True
 
         # Show final results
         self.drawboard()
-        if num_moves is None:
+        if finished:
             print(f"{curr_player} has won!")
         else:
             print(f"Game break forced after {num_moves} moves.")
@@ -113,19 +114,22 @@ if __name__ == '__main__':
     #player1 = MinMaxPlayer(name="Jaime", max_depth=4)
     #player2 = MinMaxPlayer(name="Mart", max_depth=3)
 
-    num_moves = 10 #number of moves to average results over (replications)
+    #num_moves = 30 #number of moves to average results over (replications)
 
-    #player1 = AlphaBetaPlayer(name="Jaime", max_depth=5)
-    player1 = ManualPlayer(name="Jaime", max_depth=5)
+    player1 = AlphaBetaPlayer(name="Jaime", max_depth=5)
+    #player1 = ManualPlayer(name="Jaime", max_depth=5)
     player2 = AlphaBetaPlayer(name="Mart", max_depth=5)
     test = Game(player1,player2,size=(7,6), k=4)
-    test.play(num_moves)
+
+    start = time.time()
+    test.play(num_moves=None)
+    time_taken = time.time() - start
 
     #test.plot_states()
     #test.plot_time()
 
-    print(f"\nAverage time taken to compute results for {num_moves} moves = ", np.mean(test.times_list))
-    print(f"\nAverage states visited in every move after {num_moves} moves = ", np.mean(test.states_visited_list))
+    print(f"\nTime taken to finish game = ", time_taken, " seconds")
+    print(f"\nTotal states visited in game = ", np.sum(test.states_visited_list))
     # Automatic board
     
      
