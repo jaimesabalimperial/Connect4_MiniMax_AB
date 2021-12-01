@@ -10,8 +10,6 @@ class Player():
         """ Initialises a new player with its board.
 
         Args:
-            board (Board): The player's board. If not provided, then a board
-                will be generated automatically
             name (str): Player's name
         """
         
@@ -70,20 +68,20 @@ class Player():
             for streak in streaks:
                  #exponentially higher value for larger assigned to larger streaks
                 if player == "Max":
-                    value += 10**(streak-1) #add for Max() player streaks.
+                    value += 20**(streak-1) #add for Max() player streaks.
                 elif player == "Min":
-                    value -= 10**(streak-1) #subtract for Min() player streaks.
+                    value -= 20**(streak-1) #subtract for Min() player streaks.
 
         return value
     
     def heuristic(self, board):
         """Calculates the heuristic value of a specific state for the current player (Min or Max) by iterating
-        over all columns, rows, and diagonals of each cell and 
+        over all columns, rows, and diagonals of each cell and calculating a value for them. 
 
            Value of streaks are: 
-                - one: 1 
-                - two: 10
-                - three:100
+                - one: 2
+                - two: 20
+                - three: 400
         
         Args:
             board {Board()}: board object to indicate current state of game.
