@@ -5,10 +5,8 @@ import simulation as sim
 if __name__ == '__main__':
     simulations = [
         sim.ManualVsManualSimulation(),
-        sim.ManualVsRandomSimulation(),
-        sim.RandomVsRandomSimulation(),
-        sim.ManualVsAutomaticSimulation(),
-        sim.RandomVsAutomaticSimulation(),
+        sim.ManualVsMiniMaxSimulation(),
+        sim.ManualVsAlphaBetaSimulation(),
         sim.AutomaticVsAutomaticSimulation(),
     ]
     

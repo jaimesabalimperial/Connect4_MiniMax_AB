@@ -1,7 +1,6 @@
 import random
 
 #from player import Player
-from convert import CellConverter
 from player import ManualPlayer, MiniMaxPlayer, AlphaBetaPlayer
 from board import Board
 import time
@@ -12,8 +11,10 @@ class Game():
     """ Game class for performing game simulations.
     
     General rules of the game are defined in this class. For example:
-    - if a ship is hit, the attacker has the right to play another time.
-    - if all the opponent's ships have been sunk, the game stops, and the results are printed
+    - if 4 pieces are connected by a player (in case k=4) horizontally, vertically, or
+      diagonally, the player wins.
+    - one of the m columns in the mxn grid of the board must be chosen as input. 
+
     """
 
     def __init__(self, player1, player2, size=(7,7), k=4):
@@ -40,17 +41,16 @@ class Game():
     def play(self, num_moves=None):
         """ Simulates an entire game. 
         
-        Prints out the necessary information (boards without ships, positions under attack...)
+        Prints out the necessary information. 
         """
         print(f"{self.max_player} starts the game.")
         curr_player, waiter = self.max_player, self.min_player
 
-        self.initialize_game()
+        self.initialize_game() #initialize board for game 
             
         # Simulates the game, until a player has lost
         finished = False
-        break_finished = False
-        while not finished and not break_finished:
+        while not finished:
             self.drawboard()
             print(f"{curr_player}, your turn:")
 
@@ -70,19 +70,12 @@ class Game():
             if winner > 0:
                 finished = True
             else:
-                # Players swap roles
                 curr_player, waiter = waiter, curr_player  
             
-            if num_moves is not None:
-                if self.board.game_moves >= num_moves:
-                    break_finished = True
 
         # Show final results
         self.drawboard()
-        if finished:
-            print(f"{curr_player} has won!")
-        else:
-            print(f"Game break forced after {num_moves} moves.")
+        print(f"{curr_player} has won!")
 
     def drawboard(self):
         """Draw board on terminal."""

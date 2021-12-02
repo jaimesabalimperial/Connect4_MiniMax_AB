@@ -36,7 +36,7 @@ class ManualVsMiniMaxSimulation:
     def run(self):
         # Creating a manual player with automatically generated board
         board = Board()
-        alice = ManualPlayer(board=board, name="Alice (Manual)")
+        alice = ManualPlayer(board=board, name="Alice (Manual)", MiniMax=True)
         
         # Creating a manual player
         bob = MiniMaxPlayer(name="Bob (Automatic)")

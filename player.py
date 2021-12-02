@@ -231,7 +231,7 @@ class MiniMaxPlayer(Player):
         return best_move
 
 class AlphaBetaPlayer(Player):
-    def __init__(self, name=None, max_depth=5,  manual=False):
+    def __init__(self, name=None, max_depth=5):
         super().__init__(name)
         ## Alpha is minimum value secured by Max, for herself
 
@@ -240,7 +240,6 @@ class AlphaBetaPlayer(Player):
         self.first = True
         self.alpha = None
         self.beta = None
-        self.manual = manual
         self.states_visited = 0
 
 
@@ -385,8 +384,9 @@ class ManualPlayer(Player):
         
         Args:
             board {Board()}: board object to indicate current state of game.
+            
         Returns:
-            col {int} : column number to be used to make a move in the game.
+            target_col {int} : column number to be used to make a move in the game.
         """
         while True:
             try:

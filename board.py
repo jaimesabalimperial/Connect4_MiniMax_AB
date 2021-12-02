@@ -1,6 +1,4 @@
-import sys
 from copy import deepcopy
-#sys.path.append("C:\\Users\\jsaimesabal\\Desktop\\ICL\\Intro to Symbolic AI\\CW2\\python_cw3_mb1221\\battleship")
 import numpy as np
 
 class Board():
