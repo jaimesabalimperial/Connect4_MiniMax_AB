@@ -114,15 +114,6 @@ if __name__ == '__main__':
     player2 = AlphaBetaPlayer(name="Mart", max_depth=5)
     test = Game(player1,player2,size=(7,6), k=4)
 
-    start = time.time()
     test.play(num_moves=None)
-    time_taken = time.time() - start
 
-    #test.plot_states()
-    #test.plot_time()
-
-    print(f"\nTime taken to finish game = ", time_taken, " seconds")
-    print(f"\nTotal states visited in game = ", np.sum(test.states_visited_list))
-    # Automatic board
-    
      
